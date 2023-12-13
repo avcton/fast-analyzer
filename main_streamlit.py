@@ -63,6 +63,7 @@ class DateSheet():
 
         for indx, row in self.dateSheet[['Code', 'Course']].iterrows():
             self.courses.append({
+                'Index': indx,
                 'Code': row.Code,
                 'Title': row.Course,
                 'View': row.Code + ' - ' + row.Course
@@ -79,12 +80,9 @@ class DateSheet():
         return self.dateSheet[mask]
 
     def readByCourse(self, courses: list[dict]):
-        mask = np.zeros(self.dateSheet.shape[0], dtype=bool)
+        indexes = [course['Index'] for course in courses]
 
-        for course in courses:
-            mask = mask | (self.dateSheet['Course'] == course['Title'])
-
-        return self.dateSheet[mask]
+        return self.dateSheet.iloc[indexes]
 
 
 @st.cache_data
@@ -143,3 +141,5 @@ with showcase_col:
         st.dataframe(result, hide_index=True)
 
 st.divider()
+st.caption("<center>made with <3 by avcton</center>",
+           unsafe_allow_html=True)
