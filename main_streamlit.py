@@ -82,7 +82,7 @@ class DateSheet():
         mask = np.zeros(self.dateSheet.shape[0], dtype=bool)
 
         for course in courses:
-            mask = mask | (self.dateSheet['Code'] == course['Code'])
+            mask = mask | (self.dateSheet['Course'] == course['Title'])
 
         return self.dateSheet[mask]
 
