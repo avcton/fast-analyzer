@@ -81,6 +81,7 @@ class DateSheet():
 
     def readByCourse(self, courses: list[dict]):
         indexes = [course['Index'] for course in courses]
+        indexes.sort()
 
         return self.dateSheet.iloc[indexes]
 
