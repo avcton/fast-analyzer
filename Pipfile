@@ -8,6 +8,7 @@ numpy = "*"
 pandas = "*"
 streamlit = "*"
 openpyxl = "*"
+watchdog = "*"
 
 [dev-packages]
 ipykernel = "*"
