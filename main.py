@@ -49,7 +49,7 @@ def stream_creator_info():
         time.sleep(0.02)
 
 
-creater_info_col.html("<center><h5></h3><center>")
+creater_info_col.html("<center><h2></h3><center>")
 
 if "streamed_creator_text" not in st.session_state or st.session_state['streamed_creator_text'] == False:
     creater_info_col.write_stream(stream_creator_info)
