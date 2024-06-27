@@ -1,15 +1,14 @@
-import numpy as np
 import pandas as pd
 
 
 class DateSheet():
-    def __init__(self, title: str = None, semester: str = None,) -> None:
+    def __init__(self, title: str = None) -> None:
         self.title = title
-        self.semester = semester
-        self.dateSheet_columns = ['Date', 'Day', 'Time', 'Code', 'Course']
-        self.dateSheet = pd.DataFrame(columns=self.dateSheet_columns)
+        self.columns = ['Date', 'Day', 'Time', 'Code', 'Course']
+        self.data = pd.DataFrame(columns=self.columns)
         self.loaded = False
-        self.courses = []
+        self.options = []
+        self.metadata = {}
 
     def load(self, file: any) -> bool:
         try:
@@ -20,10 +19,11 @@ class DateSheet():
                 self.title = pd.read_excel(
                     self.file, header=None, nrows=1).iloc[0, 0]
 
-            if self.semester == None:
-                # If custom semester string was not provided
-                self.semester = pd.read_excel(self.file, header=None,
+                semester = pd.read_excel(self.file, header=None,
                                               skiprows=1, nrows=1).iloc[0, 0]
+                
+                self.title += " - "
+                self.title += semester
 
             dateSheet = pd.read_excel(self.file, skiprows=2)
 
@@ -47,22 +47,19 @@ class DateSheet():
             dateSheet_refined['Date'] = pd.to_datetime(
                 dateSheet_refined['Date'], format='%d-%b-%Y')
 
-            dateSheet_refined = dateSheet_refined[self.dateSheet_columns]
+            dateSheet_refined = dateSheet_refined[self.columns]
             dateSheet_refined.sort_values(
                 by=['Date', 'Day', 'Time', 'Code'], ascending=True, inplace=True, ignore_index=True)
 
             dateSheet_refined['Date'] = dateSheet_refined['Date'].dt.strftime(
                 "%d %b %Y")
 
-            self.dateSheet = dateSheet_refined
+            self.data = dateSheet_refined
 
-            for indx, row in self.dateSheet[['Code', 'Course']].iterrows():
-                self.courses.append({
-                    'Index': indx,
-                    'Code': row.Code,
-                    'Title': row.Course,
-                    'View': row.Code + ' - ' + row.Course
-                })
+            for indx, row in self.data[['Code', 'Course']].iterrows():
+                courseView = row.Code + ' - ' + row.Course
+                self.metadata.update({courseView: indx})
+                self.options.append(courseView)
 
             self.loaded = True
 
@@ -74,18 +71,9 @@ class DateSheet():
         finally:
             return self.loaded
 
-    def readByCode(self, codes: list[str]):
-        assert(self.loaded == True)
-        mask = np.zeros(self.dateSheet.shape[0], dtype=bool)
-
-        for code in codes:
-            mask = mask | (self.dateSheet['Code'] == code)
-
-        return self.dateSheet[mask]
-
-    def readByCourse(self, courses: list[dict]):
+    def readByCourse(self, courses: list[str]):
         assert (self.loaded == True)
-        indexes = [course['Index'] for course in courses]
+        indexes = [self.metadata[course] for course in courses]
         indexes.sort()
 
-        return self.dateSheet.iloc[indexes]
+        return self.data.iloc[indexes]
